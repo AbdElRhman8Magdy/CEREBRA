@@ -64,12 +64,6 @@ export class GroupsPage {
         await expect(this.UserProfile).toBeVisible();
         await this.UserProfile.click();
     }
-    async goBack() {
-        await expect(this.GeneralTab).toBeVisible();
-        await this.GeneralTab.click();
-    }
-
-   
 
 
     //#endregion

@@ -62,11 +62,13 @@ export class DashboardPage {
 
     async openUserProfile() {
         await expect(this.UserProfile).toBeVisible();
-        await this.UserProfile.click();
+        await this.webActions.clickElement(this.UserProfile);
     }
     async goBack() {
         await expect(this.GeneralTab).toBeVisible();
-        await this.GeneralTab.click();
+        await this.webActions.clickElement(this.GeneralTab);
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+
     }
 
     async openGroupsPage() {
@@ -79,6 +81,7 @@ export class DashboardPage {
         await expect(this.SideMenuUsers).toBeVisible();
         await this.ensureSideMenuOpen();
         await this.webActions.clickElement(this.SideMenuUsers);
+        await this.webActions.waitForPageNavigation('domcontentloaded');
     }
 
     async openDepartmentsPage() {
@@ -92,7 +95,7 @@ export class DashboardPage {
         await this.webActions.clickElement(this.SideMenuRoles);
     }
 
-    async ValidateDashboardPageIsOpen(){
+    async ValidateDashboardPageIsOpen() {
         await expect(this.UserProfile).toBeVisible();
         await expect(this.GeneralTab).toBeVisible();
         await this.openGroupsPage();
@@ -107,7 +110,7 @@ export class DashboardPage {
     }
 
 
-        //#endregion
+    //#endregion
 
 
-    }
+}

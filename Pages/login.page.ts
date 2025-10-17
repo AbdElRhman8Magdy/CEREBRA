@@ -43,14 +43,15 @@ export class LoginPage {
     //#region Login Page Methods
 
     async navigateToLoginPage() {
-        await this.page.goto('/login');
+        await this.page.goto('/login', { waitUntil: 'domcontentloaded' });
     }
 
     async login(loginType: keyof typeof LoginData) {
         const credentials = LoginData[loginType];
         await this.emailInput.fill(credentials.email);
         await this.passwordInput.fill(credentials.password);
-        await this.signInButton.click();
+        await this.webActions.clickElement(this.signInButton);
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
         await expect(this.pageHeader).toContainText('Dashboard');
         await expect(this.UserProfile).toBeVisible();
 

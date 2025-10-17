@@ -53,9 +53,12 @@ interface RowData {
         if (typeof selector === "string") {
             await this.page.waitForSelector(selector, { state: 'visible', timeout: options.timeout });
             await this.page.click(selector, { timeout: options.timeout });
+            await this.waitForPageNavigation('domcontentloaded');
+
         } else {
             await selector.waitFor({ state: 'visible', timeout: options.timeout });
             await selector.click({ timeout: options.timeout });
+            await this.waitForPageNavigation('domcontentloaded');
         }
     }
 
@@ -137,7 +140,7 @@ interface RowData {
         } catch (error) {
             return false;
         }
-    }    async getTextFromWebElements(locator: string): Promise<string[]> {
+    } async getTextFromWebElements(locator: string): Promise<string[]> {
         return this.page.$$eval(locator, elements => elements.map(item => item.textContent.trim()));
     }
 
@@ -152,7 +155,7 @@ interface RowData {
 
     static async keyPress(locator: Locator, key: string): Promise<void> {
         this.page.press(locator, key);
-    }    async waitForSelector(selector: string | Locator, timeout = 10000): Promise<void> {
+    } async waitForSelector(selector: string | Locator, timeout = 10000): Promise<void> {
         if (typeof selector === "string") {
             await this.page.waitForSelector(selector, { timeout });
         } else {
@@ -176,7 +179,7 @@ interface RowData {
 
     async waitForSelectorVisible(selector: string, options: { timeout?: number } = { timeout: 30000 }): Promise<void> {
         await this.page.waitForSelector(selector, { ...options, state: 'visible' });
-    }    async verifyInputValue(locator: string, attribute: string, expectedValue: string): Promise<void> {
+    } async verifyInputValue(locator: string, attribute: string, expectedValue: string): Promise<void> {
         try {
             await this.page.waitForSelector(locator);
             if (attribute === 'value') {
@@ -254,5 +257,6 @@ interface RowData {
     async logCurrentDate(): Promise<void> {
         const currentDate = this.formatDate();
         console.log(currentDate);
-    }}
+    }
+}
 
