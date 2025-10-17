@@ -2,7 +2,7 @@ import { expect, Locator, Page } from '@playwright/test';
 import { WebActionsObj } from '../Lib/WebActions';
 
 
-export class DashboardPage {
+export class GroupsPage {
 
     private readonly page: Page;
     private readonly webActions: WebActionsObj;
@@ -69,45 +69,10 @@ export class DashboardPage {
         await this.GeneralTab.click();
     }
 
-    async openGroupsPage() {
-        await expect(this.SideMenuGroups).toBeVisible();
-        await this.ensureSideMenuOpen();
-        await this.webActions.clickElement(this.SideMenuGroups);
-    }
-
-    async openUsersPage() {
-        await expect(this.SideMenuUsers).toBeVisible();
-        await this.ensureSideMenuOpen();
-        await this.webActions.clickElement(this.SideMenuUsers);
-    }
-
-    async openDepartmentsPage() {
-        await expect(this.SideMenuDepartments).toBeVisible();
-        await this.ensureSideMenuOpen();
-        await this.webActions.clickElement(this.SideMenuDepartments);
-    }
-    async openRolesPage() {
-        await expect(this.SideMenuRoles).toBeVisible();
-        await this.ensureSideMenuOpen();
-        await this.webActions.clickElement(this.SideMenuRoles);
-    }
-
-    async ValidateDashboardPageIsOpen(){
-        await expect(this.UserProfile).toBeVisible();
-        await expect(this.GeneralTab).toBeVisible();
-        await this.openGroupsPage();
-        await this.goBack();
-        await this.openUsersPage();
-        await this.goBack();
-        await this.openDepartmentsPage();
-        await this.goBack();
-        await this.openRolesPage();
-        await this.goBack();
-
-    }
+   
 
 
-        //#endregion
+    //#endregion
 
 
-    }
+}
