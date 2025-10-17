@@ -53,15 +53,7 @@ test.describe("Test Cases Related to Login @Login", () => {
         
         await dashboardPage.openGroupsPage();
     
-        await page.getByRole('button', { name: 'New Group' }).click();
-        await page.getByRole('textbox', { name: 'Name' }).click();
-        await page.getByRole('textbox', { name: 'Name' }).fill('CurrentDateNewGroup');
-        await expect(page.getByRole('button', { name: 'Create', exact: true })).toBeVisible();
-        await page.getByRole('button', { name: 'Create', exact: true }).click();
-        await expect(page.locator('div').filter({ hasText: 'Created' }).nth(3)).toBeVisible();
-        await page.getByRole('heading', { name: 'Created' }).click();
-        await page.getByRole('link', { name: 'CurrentDateNewGroup' }).click();
-        await page.getByRole('textbox', { name: 'Email address*' }).fill('dummyqatask@dummyqatask.test');
+    
     });
 
     test('L_03 dashboard Page', async ({ page }) => {

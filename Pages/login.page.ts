@@ -52,7 +52,7 @@ export class LoginPage {
         await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
         await expect(this.pageHeader).toContainText('Dashboard');
         await expect(this.UserProfile).toBeVisible();
-
+        await this.saveAuthState();
     }
 
     async copyCookies() {
