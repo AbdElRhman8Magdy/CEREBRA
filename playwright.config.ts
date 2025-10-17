@@ -18,9 +18,9 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 1 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? '75%' : '50%',
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
@@ -39,23 +39,23 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-        name: `Chromium`,
-        use: {
-          browserName: `chromium`,
-          baseURL: 'https://qa.staging.cyber.beshield-sa.com/',
-          headless: true,
-          viewport: { width: 2200, height: 1080 },
-          ignoreHTTPSErrors: true,
-          acceptDownloads: true,
-          screenshot: `only-on-failure`,
-          video: `off`,
-          trace: `off`,
-          launchOptions: {
-            args: ["--start-maximized"],
-            slowMo: 200
-          }
-        },
-      }
+      name: `Chromium`,
+      use: {
+        browserName: `chromium`,
+        baseURL: 'https://qa.staging.cyber.beshield-sa.com/',
+        headless: true,
+        viewport: { width: 2200, height: 1080 },
+        ignoreHTTPSErrors: true,
+        acceptDownloads: true,
+        screenshot: `only-on-failure`,
+        video: `retry-with-video`,
+        trace: `retain-on-first-failure`,
+        launchOptions: {
+          args: ["--start-maximized"],
+          slowMo: 200
+        }
+      },
+    }
     // ,
 
     // {
