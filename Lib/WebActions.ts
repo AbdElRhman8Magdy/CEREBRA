@@ -3,7 +3,6 @@ import * as path from 'path';
 import type { Page, ElementHandle, Locator, FrameLocator } from '@playwright/test';
 import { BrowserContext, errors, expect } from '@playwright/test';
 
-import { Frame } from '@playwright/test';
 
 
 const waitForElement = 100000;
