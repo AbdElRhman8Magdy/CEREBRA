@@ -1,3 +1,4 @@
+export * from './Dashboard.page';
 import { expect, Locator, Page } from '@playwright/test';
 import { WebActionsObj } from '../Lib/WebActions';
 
