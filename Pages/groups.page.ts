@@ -23,21 +23,6 @@ export class GroupsPage {
         return this.page.getByRole('button', { name: 'User Management' });
     }
 
-    private get SideMenuGroups(): Locator {
-        return this.page.getByRole('link', { name: 'Groups' });
-    }
-
-    private get SideMenuUsers(): Locator {
-        return this.page.getByRole('link', { name: 'Users' });
-    }
-
-    private get SideMenuDepartments(): Locator {
-        return this.page.getByRole('link', { name: 'Departments' });
-    }
-
-    private get SideMenuRoles(): Locator {
-        return this.page.getByRole('link', { name: 'Roles' });
-    }
 
     private get UserProfile(): Locator {
         return this.page.getByRole('button', { name: 'User menu' });
@@ -51,13 +36,7 @@ export class GroupsPage {
 
     //#region Dashboard Page Methods
 
-    private async ensureSideMenuOpen(): Promise<void> {
-        if (!(await this.SideMenuGroups.isVisible())) {
-            await expect(this.SideMenuArrow).toBeVisible();
-            await this.SideMenuArrow.click();
-            await expect(this.SideMenuGroups).toBeVisible();
-        }
-    }
+
 
 
     async openUserProfile() {
