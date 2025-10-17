@@ -31,7 +31,10 @@ export class LoginPage {
         return this.page.getByRole('button', { name: 'Sign in' });
     }
     private get pageHeader(): Locator {
-        return this.page.getByRole('heading', { name: 'CEREBRA' });
+        return this.page.getByRole('heading', { name: 'Dashboard' });
+    }
+    private get UserProfile(): Locator {
+        return this.page.getByRole('button', { name: 'User menu' });
     }
 
 
@@ -48,6 +51,9 @@ export class LoginPage {
         await this.emailInput.fill(credentials.email);
         await this.passwordInput.fill(credentials.password);
         await this.signInButton.click();
+        await expect(this.pageHeader).toContainText('Dashboard');
+        await expect(this.UserProfile).toBeVisible();
+
     }
 
 
