@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { Page, ElementHandle, Locator, FrameLocator  } from '@playwright/test';
+import type { Page, ElementHandle, Locator, FrameLocator } from '@playwright/test';
 import { BrowserContext, errors, expect } from '@playwright/test';
 
 import { Frame } from '@playwright/test';
@@ -11,11 +11,7 @@ const waitForElement = 100000;
 
 interface RowData {
     [key: string]: any;
-}
-
-
-
-export class WebActionsObj {
+}export class WebActionsObj {
     readonly page: Page;
     static page: any;
 
@@ -36,29 +32,25 @@ export class WebActionsObj {
             throw new Error(`Element ${locator} did not appear within timeout.`);
         }
     }
-    
-
-
-
     async waitForPageNavigation(event: string, timeout: number = waitForElement, page: Page = this.page): Promise<void> {
-        try{
-        switch (event.toLowerCase()) {
-            case 'networkidle':
-                await page.waitForLoadState('networkidle', {timeout:timeout});
-                break;
-            case 'load':
-                await page.waitForLoadState('load', {timeout: timeout });
-                break;
-            case '':
-                await page.waitForLoadState('domcontentloaded', {timeout: timeout });
+        try {
+            switch (event.toLowerCase()) {
+                case 'networkidle':
+                    await page.waitForLoadState('networkidle', { timeout: timeout });
+                    break;
+                case 'load':
+                    await page.waitForLoadState('load', { timeout: timeout });
+                    break;
+                case '':
+                    await page.waitForLoadState('domcontentloaded', { timeout: timeout });
+            }
+        } catch (error) {
+            console.error(`Error: waiting exceeded timeout: ${timeout}ms`);
         }
-    } catch (error) {
-        console.error(`Error: waiting exceeded timeout: ${timeout}ms`);
     }
-}
 
 
-    async clickElement(selector: string | Locator,options: { timeout?: number } = { timeout: 15000 }): Promise<void> {
+    async clickElement(selector: string | Locator, options: { timeout?: number } = { timeout: 15000 }): Promise<void> {
         if (typeof selector === "string") {
             await this.page.waitForSelector(selector, { state: 'visible', timeout: options.timeout });
             await this.page.click(selector, { timeout: options.timeout });
@@ -68,7 +60,7 @@ export class WebActionsObj {
         }
     }
 
-    
+
     async delay(time: number): Promise<void> {
         return new Promise(function (resolve) {
             setTimeout(resolve, time);
@@ -80,7 +72,7 @@ export class WebActionsObj {
 
         await object.clear();
         await object.focus();
-        
+
         // Type letter by letter with delay
         for (let i = 0; i < value.length; i++) {
             await this.page.keyboard.type(value[i]);
@@ -88,7 +80,7 @@ export class WebActionsObj {
                 await this.delay(delayBetweenChars);
             }
         }
-    
+
     }
 
 
@@ -96,40 +88,40 @@ export class WebActionsObj {
         await object.click({ timeout: 20000 });
         await this.delay(500);
         await object.pressSequentially(option);
-    
+
         const optionElement = this.page.getByRole('option', { name: option, exact: isExact });
-    
+
         try {
-          await optionElement.waitFor({ state: 'visible', timeout: timeOut });
-          await optionElement.click();
+            await optionElement.waitFor({ state: 'visible', timeout: timeOut });
+            await optionElement.click();
         } catch (error) {
-          if (error instanceof errors.TimeoutError) {
-            await this.page.getByRole('option').first().click();
-          } else {
-            throw error;
-          }
+            if (error instanceof errors.TimeoutError) {
+                await this.page.getByRole('option').first().click();
+            } else {
+                throw error;
+            }
         }
-    
+
     }
 
     async selectOptionFromDropdown(dropdown: Locator, option: string): Promise<void> {
         await dropdown.click({ timeout: 20000 });
         await this.page.waitForTimeout(300); // Allow the dropdown to render
-    
+
         // Primary attempt: use getByRole with name
         const optionByRole = this.page.getByRole('option', { name: option });
-    
+
         try {
             await optionByRole.first().waitFor({ state: 'visible', timeout: 2000 });
             await optionByRole.first().click({ timeout: 20000 });
         } catch (primaryError) {
             console.warn(`Primary role-based lookup failed for "${option}". Trying fallback.`);
-    
+
             // Fallback: find li[role="option"] that contains the text inside its children (like a span)
             const fallbackOption = this.page.locator('li[role="option"]', {
                 hasText: option,
             });
-    
+
             try {
                 await fallbackOption.first().waitFor({ state: 'visible', timeout: 2000 });
                 await fallbackOption.first().click({ timeout: 20000 });
@@ -138,10 +130,6 @@ export class WebActionsObj {
             }
         }
     }
-    
-    
-    
-    
 
     async isElementVisible(locator: Locator, timeout: number = 20000): Promise<boolean> {
         try {
@@ -150,14 +138,10 @@ export class WebActionsObj {
         } catch (error) {
             return false;
         }
-    }
-    
-    
-
-    async getTextFromWebElements(locator: string): Promise<string[]> {
+    }    async getTextFromWebElements(locator: string): Promise<string[]> {
         return this.page.$$eval(locator, elements => elements.map(item => item.textContent.trim()));
     }
-    
+
     async downloadFile(locator: string): Promise<string> {
         const [download] = await Promise.all([
             this.page.waitForEvent('download'),
@@ -169,27 +153,14 @@ export class WebActionsObj {
 
     static async keyPress(locator: Locator, key: string): Promise<void> {
         this.page.press(locator, key);
-    }
-
-    
-
-    
-
-
-
-
-
-    
-    
-
-    async waitForSelector(selector: string | Locator, timeout = 10000): Promise<void> {
+    }    async waitForSelector(selector: string | Locator, timeout = 10000): Promise<void> {
         if (typeof selector === "string") {
             await this.page.waitForSelector(selector, { timeout });
         } else {
             await selector.waitFor({ state: 'visible', timeout });
         }
-    }    
-      
+    }
+
     async waitForSelectorInvisible(selector: string | Locator, timeout = 60000): Promise<boolean> {
         try {
             if (typeof selector === "string") {
@@ -202,19 +173,11 @@ export class WebActionsObj {
             return false; // Return false if the element did not become hidden within the timeout
         }
     }
-    
-        
+
+
     async waitForSelectorVisible(selector: string, options: { timeout?: number } = { timeout: 30000 }): Promise<void> {
         await this.page.waitForSelector(selector, { ...options, state: 'visible' });
-    }
-    
-
-
-
-    
- 
-
-    async verifyInputValue(locator: string, attribute: string, expectedValue: string): Promise<void> {
+    }    async verifyInputValue(locator: string, attribute: string, expectedValue: string): Promise<void> {
         try {
             await this.page.waitForSelector(locator);
             if (attribute === 'value') {
@@ -234,18 +197,18 @@ export class WebActionsObj {
             console.error(`Error verifying attribute "${attribute}" for element with locator "${locator}":`, error);
         }
     }
-    
-    
-    async verifypagetitle(value: string): Promise<void>{
-       
-        await expect(this.page).toHaveTitle(value);   
-        
+
+
+    async verifypagetitle(value: string): Promise<void> {
+
+        await expect(this.page).toHaveTitle(value);
+
     }
 
-    async verifypageurl(value: string): Promise<void>{
-        
+    async verifypageurl(value: string): Promise<void> {
+
         expect(this.page.url()).toContain(value);
-        
+
     }
 
     async verifyElementIsDisplayed(locator: string, errorMessage: string): Promise<void> {
@@ -261,58 +224,6 @@ export class WebActionsObj {
         expect(expectedValue.trim(), `${errorMessage}`).toBe(actualValue);
     }
 
-    async changeLanguage(language: string): Promise<void> {
-        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
-    
-        // Ensure page is fully loaded by checking visibility of a known button
-        await expect(this.page.locator("//button[@class='outline-btn main-btn phone-auth']")).toBeVisible();
-    
-        const languageButton = this.page.locator("//app-language//span").first();
-        await expect(languageButton).toBeVisible();
-    
-        for (let attempt = 0; attempt < 3; attempt++) {
-            try {
-                console.log(`Attempt ${attempt + 1}: Clicking on language button for ${language}`);
-                await languageButton.click({ timeout: 20000 });
-    
-                // If clicking opens a dropdown, you might want to select from options here
-                // e.g., await this.page.locator(`text=${language.toUpperCase()}`).click();
-    
-                await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
-    
-                // Validate if URL now includes the language
-                if (this.page.url().includes(`/${language}`)) {
-                    console.log(` Successfully changed language to ${language}`);
-                    return;
-                }
-            } catch (error) {
-                console.error(` Attempt ${attempt + 1} failed:`, error);
-                await this.page.waitForTimeout(1000);
-            }
-        }
-    
-        throw new Error(` Failed to change language to '${language}' after multiple attempts`);
-    }
-    
-    
-    
-    
-    
-
-    
-
-    async handlePermissions(origin?: string): Promise<void> {
-        const context = this.page.context();
-        // Clear any previously set permissions
-        await context.clearPermissions();
-        // Grant permissions — optionally for a specific origin
-        await context.grantPermissions(['geolocation'], origin ? { origin } : undefined);
-        console.log(` Permissions granted${origin ? ` for origin: ${origin}` : ''}`);
-    }
-    
-
-
-
     async isElementDisabled(locator: string): Promise<boolean> {
         const element = await this.page.$(locator);
         const isDisabled = await element?.getAttribute('class');
@@ -322,7 +233,7 @@ export class WebActionsObj {
     async verifyElementIsNotVisible(locator: string): Promise<void> {
         const element = this.page.locator(locator);
         const isVisible = await element.isVisible();
-    
+
         if (isVisible) {
             // If the element is visible, throw an error
             throw new Error(`Element ${locator} is visible, but it should not be.`);
@@ -331,58 +242,18 @@ export class WebActionsObj {
             console.log(`Element ${locator} is correctly not visible.`);
         }
     }
-    
+
     private formatDate(): string {
         const date = new Date();
         const day = String(date.getDate()).padStart(2, '0');
         const month = date.toLocaleString('en-US', { month: 'short' });
         const year = date.getFullYear();
-    
+
         return `${day} ${month}, ${year}`;
     }
-    
+
     async logCurrentDate(): Promise<void> {
         const currentDate = this.formatDate();
-        console.log(currentDate);  
-    }
-
-  
-   
-    
-    
-   
-
-
-  
-    
-
-
-
-    
- 
-
-   
-   
-   
-
-    
-
-    
-    
-    
-    
-      
-    
-    
-    
-    
-    
-
-    
-
-}
-
-
-
-
+        console.log(currentDate);
+    }}
 
