@@ -1,0 +1,50 @@
+import { test, expect } from '@playwright/test';
+import { WebActionsObj } from '../Lib/WebActions';
+import { LoginPage } from '../Pages/login.page';
+import { LoginData } from '../test-data/LoginData';
+
+test.describe("Test Cases Related to Login @Login", () => {
+
+    let webActions: WebActionsObj;
+    let loginPage: LoginPage;
+
+    test.beforeEach(async ({ page }) => {
+
+        await page.waitForLoadState('domcontentloaded');
+        await page.goto("/en", { waitUntil: 'domcontentloaded' });
+        const currentUrl = page.url();
+        console.log('Current URL:', currentUrl);
+        loginPage = new LoginPage(page);
+        webActions = new WebActionsObj(page);
+    });
+
+    test('L_01 Login Page', async ({ page }) => {
+        await loginPage.navigateToLoginPage();
+        await loginPage.login('ValidLogin');
+    });
+  // await page.getByRole('textbox', { name: 'Password*' }).click();
+  // await page.getByRole('textbox', { name: 'Email address*' }).click();
+  // await page.getByRole('textbox', { name: 'Email address*' }).fill('dummyqatask@dummyqatask.test');
+  // await page.getByRole('textbox', { name: 'Password*' }).fill('Dummyqatask@12345');
+  // await page.getByRole('button', { name: 'Sign in' }).click();
+  // await expect(page.getByRole('heading')).toContainText('Dashboard');
+
+ test('L_02 Login Page', async ({ page }) => {
+        await loginPage.navigateToLoginPage();
+        await loginPage.login('ValidLogin');
+   
+  await page.getByRole('button', { name: 'User Management' }).click();
+  await page.getByRole('button', { name: 'User Management' }).click();
+  await expect(page.getByRole('link', { name: 'Groups' })).toBeVisible();
+  await page.getByRole('link', { name: 'Groups' }).click();
+  await page.getByRole('button', { name: 'New Group' }).click();
+  await page.getByRole('textbox', { name: 'Name' }).click();
+  await page.getByRole('textbox', { name: 'Name' }).fill('CurrentDateNewGroup');
+  await expect(page.getByRole('button', { name: 'Create', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Create', exact: true }).click();
+  await expect(page.locator('div').filter({ hasText: 'Created' }).nth(3)).toBeVisible();
+  await page.getByRole('heading', { name: 'Created' }).click();
+  await page.getByRole('link', { name: 'CurrentDateNewGroup' }).click();
+  await page.getByRole('textbox', { name: 'Email address*' }).fill('dummyqatask@dummyqatask.test');
+   });
+});

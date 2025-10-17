@@ -1,4 +1,4 @@
-export const loginTestData = {
+export const LoginData = {
  
   ValidLogin: {
     email: 'dummyqatask@dummyqatask.test',
