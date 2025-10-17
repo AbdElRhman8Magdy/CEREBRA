@@ -8,14 +8,18 @@ export class GroupsPage {
     private readonly webActions: WebActionsObj;
 
     private readonly currentDateString = new Date().toISOString().replace(/[:.]/g, '-');
-
+    private readonly DateString = this.currentDateString;
     constructor(page: Page) {
         this.page = page;
         this.webActions = new WebActionsObj(page);
     }
 
-    private linkEdit = this.groupLinkByName(this.currentDateString + '_Edited');
-    private link = this.groupLinkByName(this.currentDateString);
+    private get linkEdit(): Locator {
+        return this.page.getByRole('link', { name: this.currentDateString + '_Edited' });
+    }
+    private get link(): Locator {
+        return this.page.getByRole('link', { name: this.currentDateString });
+    }
 
     //#region Groups Page Locators
 
@@ -25,6 +29,9 @@ export class GroupsPage {
 
     private get nameTextbox(): Locator {
         return this.page.getByRole('textbox', { name: 'Name' });
+    }
+    private get EditedTextbox(): Locator {
+        return this.page.getByRole('textbox', { name: 'Name' })
     }
 
     private get createButton(): Locator {
@@ -39,12 +46,10 @@ export class GroupsPage {
         return this.page.getByRole('heading', { name: 'Created' });
     }
 
-    private emailTextboxByLabel(label = 'Email address*'): Locator {
-        return this.page.getByRole('textbox', { name: label });
-    }
+    
 
-    private groupLinkByName(name: string): Locator {
-        return this.page.getByRole('link', { name });
+    private groupLinkByName(): Locator {
+        return this.page.getByRole('link', );
     }
     private searchfield(): Locator {
         return this.page.getByRole('searchbox', { name: 'Search' })
@@ -66,73 +71,85 @@ export class GroupsPage {
         await this.webActions.clickElement(this.newGroupButton);
         await expect(this.nameTextbox).toBeVisible();
     }
-       
-    async setGroupName(): Promise < void> {
 
-    await this.webActions.clickElement(this.nameTextbox);
-    await this.nameTextbox.fill(this.currentDateString);
-}
+    async setGroupName(): Promise<void> {
 
-    async clickCreate(): Promise < void> {
-    await expect(this.createButton).toBeVisible();
-    await this.webActions.clickElement(this.createButton);
-}
-
-    async waitForCreatedToast(): Promise < void> {
-    await expect(this.createdToast).toBeVisible();
-    await expect(this.createdHeading).toBeVisible();
-}
-
-    async openGroupByName(): Promise < void> {
-    await expect(this.searchfield()).toBeVisible();
-    await this.searchfield().fill(this.currentDateString);
-
-    await expect(this.link).toBeVisible();
-    await this.webActions.clickElement(this.link);
-    await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
-    await expect(this.saveChanges()).toBeVisible();
-    await expect(this.deleteChanges()).toBeVisible();
-}
-
-    async openGroupByNameEdited(): Promise < void> {
-    await expect(this.searchfield()).toBeVisible();
-    await this.searchfield().fill(this.currentDateString);
-    await expect(this.linkEdit).toBeVisible();
-    await this.webActions.clickElement(this.linkEdit);
-    await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
-    await expect(this.saveChanges()).toBeVisible();
-    await expect(this.deleteChanges()).toBeVisible();
-}
-    
-
-    async setGroupEmail(email: string): Promise < void> {
-    const emailBox = this.emailTextboxByLabel();
-    await expect(emailBox).toBeVisible();
-    await emailBox.fill(email);
-}
-
-    async createNewGroup(email ?: string): Promise < void> {
-    await this.openNewGroupDialog();
-    await this.setGroupName();
-    await this.clickCreate();
-    await this.waitForCreatedToast();
-    // open created group and optionally set email
-    await this.createdHeading.click();
-    await this.openGroupByName();
-    if(email) {
-        await this.setGroupEmail(email);
+        await this.webActions.clickElement(this.nameTextbox);
+        await this.webActions.setValue(this.nameTextbox, this.DateString);
     }
-}
 
-    async editGroupName(): Promise < void> {
-    await expect(this.nameTextbox).toBeVisible();
-    await this.webActions.clickElement(this.nameTextbox);
-    await this.nameTextbox.fill(this.currentDateString + '_Edited');
-    await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
-    await this.webActions.clickElement(this.saveChanges());
-    await this.openGroupByNameEdited();
-    await expect(this.linkEdit).toBeVisible();
-}
+    async clickCreate(): Promise<void> {
+        await expect(this.createButton).toBeVisible();
+        await this.webActions.clickElement(this.createButton);
+    }
+
+    async waitForCreatedToast(): Promise<void> {
+        await expect(this.createdToast).toBeVisible();
+        await expect(this.createdHeading).toBeVisible();
+    }
+
+    async openGroupByName(): Promise<void> {
+        await expect(this.searchfield()).toBeVisible();
+        await this.webActions.setValue(this.searchfield(), this.DateString);
+        await this.page.waitForLoadState('networkidle');
+
+        await expect(this.link).toBeVisible();
+        await this.webActions.clickElement(this.link);
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+        await expect(this.saveChanges()).toBeVisible();
+        await expect(this.deleteChanges()).toBeVisible();
+    }
+
+    async openGroupByNameEdited(): Promise<void> {
+        await expect(this.searchfield()).toBeVisible();
+        await this.webActions.setValue(this.searchfield(), this.DateString + '_Edited');
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+        await expect(this.linkEdit).toBeVisible();
+        await this.webActions.clickElement(this.linkEdit);
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+        await expect(this.saveChanges()).toBeVisible();
+        await expect(this.deleteChanges()).toBeVisible();
+    }
+
+
+    async setGroupEmail(email: string): Promise<void> {
+        const emailBox = this.emailTextboxByLabel();
+        await expect(emailBox).toBeVisible();
+        await emailBox.fill(email);
+    }
+
+    async createNewGroup(email?: string): Promise<void> {
+        await this.openNewGroupDialog();
+        await this.setGroupName();
+        await this.clickCreate();
+        await this.waitForCreatedToast();
+        // open created group and optionally set email
+        await this.createdHeading.click();
+        await this.openGroupByName();
+        if (email) {
+            await this.setGroupEmail(email);
+        }
+    }
+
+    async editGroupName(): Promise<void> {
+        await expect(this.nameTextbox).toBeVisible();
+        await this.webActions.clickElement(this.nameTextbox);
+        await this.webActions.setValue(this.nameTextbox, this.DateString + '_Edited');
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+        await this.webActions.clickElement(this.saveChanges());
+        await this.openGroupByNameEdited();
+        await expect(this.EditedTextbox).toBeVisible();
+        console.log('Edited Textbox Value:', await this.EditedTextbox.inputValue());
+        const editedValue = await this.EditedTextbox.inputValue();
+        await expect(editedValue).toContain('_Edited');
+    }
+
+    async deleteGroupName(): Promise<void> {
+        await this.openGroupByName();
+        await expect(this.EditedTextbox).toBeVisible();
+        await this.webActions.clickElement(this.deleteChanges());
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+    }
 
     //#endregion
 

@@ -25,19 +25,19 @@ export class DashboardPage {
     }
 
     private get SideMenuGroups(): Locator {
-        return this.page.getByRole('link', { name: 'Groups' });
+        return this.page.locator('.fi-sidebar-item').filter({ hasText: 'Groups' });
     }
 
     private get SideMenuUsers(): Locator {
-        return this.page.getByRole('link', { name: 'Users' });
+        return this.page.locator('.fi-sidebar-item').filter({ hasText: 'Users' });
     }
 
     private get SideMenuDepartments(): Locator {
-        return this.page.getByRole('link', { name: 'Departments' });
+        return this.page.locator('.fi-sidebar-item').filter({ hasText: 'Departments' });
     }
 
     private get SideMenuRoles(): Locator {
-        return this.page.getByRole('link', { name: 'Roles' });
+        return this.page.locator('.fi-sidebar-item').filter({ hasText: 'Roles' });
     }
 
     private get UserProfile(): Locator {

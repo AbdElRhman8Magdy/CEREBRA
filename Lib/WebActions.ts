@@ -78,7 +78,7 @@ interface RowData {
         // Type letter by letter with delay
         for (let i = 0; i < value.length; i++) {
             await this.page.keyboard.type(value[i]);
-            if (i < value.length - 1) { // Don't delay after the last character
+            if (i < value.length - 10) { // Don't delay after the last character
                 await this.delay(delayBetweenChars);
             }
         }

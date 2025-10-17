@@ -101,7 +101,7 @@ export class LoginPage {
             return;
         }
         // reload so cookies are sent and localStorage is available in the app
-        await this.page.reload({ waitUntil: 'domcontentloaded' });
+        await this.page.reload({ waitUntil: 'domcontentloaded' , timeout: 10000 });
     }
 
     //#endregion
