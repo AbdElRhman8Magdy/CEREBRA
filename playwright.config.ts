@@ -22,7 +22,11 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    ['junit', { outputFile: 'playwright-report/results.xml' }]
+  ],
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
@@ -35,19 +39,34 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+        name: `Chromium`,
+        use: {
+          browserName: `chromium`,
+          baseURL: 'https://qa.staging.cyber.beshield-sa.com/',
+          headless: true,
+          viewport: { width: 2200, height: 1080 },
+          ignoreHTTPSErrors: true,
+          acceptDownloads: true,
+          screenshot: `only-on-failure`,
+          video: `off`,
+          trace: `off`,
+          launchOptions: {
+            args: ["--start-maximized"],
+            slowMo: 200
+          }
+        },
+      }
+    // ,
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
 
     /* Test against mobile viewports. */
     // {

@@ -1,21 +1,19 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { WebActionsObj } from '../Lib/WebActions';
 import { LoginData } from '../test-data/LoginData';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class LoginPage {
 
     private readonly page: Page;
     private readonly webActions: WebActionsObj;
-
-
-
+    private readonly cookiesFile = path.join(__dirname, '..', 'cookies.json');
 
     constructor(page: Page) {
         this.page = page;
         this.webActions = new WebActionsObj(page);
     }
-
-
 
     //#region Login Page Locators 
 
@@ -57,6 +55,54 @@ export class LoginPage {
 
     }
 
+    async copyCookies() {
+        const cookies = await this.page.context().cookies();
+        console.log('Cookies:', cookies);
+    }
+
+    async saveAuthState() {
+        const context = this.page.context();
+        const cookies = await context.cookies();
+        const localStorage = await this.page.evaluate(() => JSON.stringify(window.localStorage));
+        
+        const authState = {
+            cookies,
+            localStorage
+        };
+
+        fs.writeFileSync(this.cookiesFile, JSON.stringify(authState));
+    }
+
+    async loadAuthState() {
+        if (!fs.existsSync(this.cookiesFile)) {
+            return false;
+        }
+
+        const authState = JSON.parse(fs.readFileSync(this.cookiesFile, 'utf-8'));
+
+        await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+        await this.page.context().addCookies(authState.cookies);
+
+        await this.page.evaluate((localStorageString) => {
+            const data = JSON.parse(localStorageString);
+            for (const [key, value] of Object.entries(data)) {
+                window.localStorage.setItem(key, value as string);
+            }
+        }, authState.localStorage);
+
+        return true;
+    }
+
+    async loginWithSavedState() {
+        const hasAuthState = await this.loadAuthState();
+        if (!hasAuthState) {
+            await this.login('ValidLogin');
+            await this.saveAuthState();
+            return;
+        }
+        // reload so cookies are sent and localStorage is available in the app
+        await this.page.reload({ waitUntil: 'domcontentloaded' });
+    }
 
     //#endregion
 
