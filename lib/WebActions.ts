@@ -85,6 +85,8 @@ interface RowData {
 
     }
 
+    
+
 
     async typeAndSelectOptionFromDropdown(object: Locator, option: string, isExact: boolean = true, timeOut: number = 3000): Promise<void> {
         await object.click({ timeout: 20000 });
