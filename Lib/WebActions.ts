@@ -49,10 +49,10 @@ interface RowData {
     }
 
 
-    async clickElement(selector: string | Locator, options: { timeout?: number } = { timeout: 15000 }): Promise<void> {
+    async clickElement(selector: string | Locator, options: { timeout?: number } = { timeout: 15000 }, forceClick: boolean = false): Promise<void> {
         if (typeof selector === "string") {
             await this.page.waitForSelector(selector, { state: 'visible', timeout: options.timeout });
-            await this.page.click(selector, { timeout: options.timeout });
+            await this.page.click(selector, { timeout: options.timeout, delay: 100, force: forceClick });
             await this.waitForPageNavigation('domcontentloaded');
 
         } else {
@@ -68,92 +68,116 @@ interface RowData {
             setTimeout(resolve, time);
         });
     }
-
+    async selectNativeOption(locator: Locator, valueOrLabel: { value?: string, label?: string } | string) {
+        // Accept either string or object; try selectOption then fallback to JS dispatch
+        try {
+            if (typeof valueOrLabel === 'string') {
+                await locator.selectOption({ value: valueOrLabel });
+            } else if (valueOrLabel.value) {
+                await locator.selectOption({ value: valueOrLabel.value });
+            } else if (valueOrLabel.label) {
+                await locator.selectOption({ label: valueOrLabel.label });
+            }
+        } catch {
+            // fallback: set value and dispatch events
+            const id = await locator.getAttribute('id');
+            if (id) {
+                await this.page.evaluate((idVal, val) => {
+                    const el = document.getElementById(idVal) as HTMLSelectElement | null;
+                    if (el) {
+                        el.value = val;
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }, id, typeof valueOrLabel === 'string' ? valueOrLabel : (valueOrLabel.value ?? valueOrLabel.label));
+            }
+        }
+    }
 
     async setValue(object: Locator, value: string, delayBetweenChars: number = 2) {
 
-        await object.clear();
-        await object.focus();
+            await object.clear();
+            await object.focus();
 
-        // Type letter by letter with delay
-        for (let i = 0; i < value.length; i++) {
-            await this.page.keyboard.type(value[i]);
-            if (i < value.length - 10) { // Don't delay after the last character
-                await this.delay(delayBetweenChars);
+            // Type letter by letter with delay
+            for (let i = 0; i < value.length; i++) {
+                await this.page.keyboard.type(value[i]);
+                if (i < value.length - 10) { // Don't delay after the last character
+                    await this.delay(delayBetweenChars);
+                }
             }
-        }
 
-    }
+        }
 
     
 
 
-    async typeAndSelectOptionFromDropdown(object: Locator, option: string, isExact: boolean = true, timeOut: number = 3000): Promise<void> {
-        await object.click({ timeout: 20000 });
-        await this.delay(500);
-        await object.pressSequentially(option);
+    async typeAndSelectOptionFromDropdown(object: Locator, option: string, isExact: boolean = true, timeOut: number = 3000): Promise < void> {
+            await this.clickElement(object, { timeout: 20000 });
+            await this.delay(500);
+            await object.pressSequentially(option);
 
-        const optionElement = this.page.getByRole('option', { name: option, exact: isExact });
-
-        try {
-            await optionElement.waitFor({ state: 'visible', timeout: timeOut });
-            await optionElement.click();
-        } catch (error) {
-            if (error instanceof errors.TimeoutError) {
-                await this.page.getByRole('option').first().click();
-            } else {
-                throw error;
-            }
-        }
-
-    }
-
-    async selectOptionFromDropdown(dropdown: Locator, option: string): Promise<void> {
-        await dropdown.click({ timeout: 20000 });
-        await this.page.waitForTimeout(300); // Allow the dropdown to render
-
-        // Primary attempt: use getByRole with name
-        const optionByRole = this.page.getByRole('option', { name: option });
-
-        try {
-            await optionByRole.first().waitFor({ state: 'visible', timeout: 2000 });
-            await optionByRole.first().click({ timeout: 20000 });
-        } catch (primaryError) {
-            console.warn(`Primary role-based lookup failed for "${option}". Trying fallback.`);
-
-            // Fallback: find li[role="option"] that contains the text inside its children (like a span)
-            const fallbackOption = this.page.locator('li[role="option"]', {
-                hasText: option,
-            });
+            const optionElement = this.page.getByRole('option', { name: option, exact: isExact });
 
             try {
-                await fallbackOption.first().waitFor({ state: 'visible', timeout: 2000 });
-                await fallbackOption.first().click({ timeout: 20000 });
-            } catch (fallbackError) {
-                throw new Error(`Could not select option "${option}" from dropdown. Tried both role-based and fallback lookup.`);
+                await optionElement.waitFor({ state: 'visible', timeout: timeOut });
+                await optionElement.click();
+            } catch(error) {
+                if (error instanceof errors.TimeoutError) {
+                    await this.clickElement(this.page.getByRole('option').first());
+                } else {
+                    throw error;
+                }
+            }
+
+        }
+
+    async selectOptionFromDropdown(dropdown: Locator, option: string): Promise < void> {
+            await dropdown.click({ timeout: 20000 });
+            await this.page.waitForTimeout(300); // Allow the dropdown to render
+
+            // Primary attempt: use getByRole with name
+            const optionByRole = this.page.getByRole('option', { name: option });
+
+            try {
+                await optionByRole.first().waitFor({ state: 'visible', timeout: 2000 });
+                await optionByRole.first().click({ timeout: 20000 });
+            } catch(primaryError) {
+                console.warn(`Primary role-based lookup failed for "${option}". Trying fallback.`);
+
+                // Fallback: find li[role="option"] that contains the text inside its children (like a span)
+                const fallbackOption = this.page.locator('li[role="option"]', {
+                    hasText: option,
+                });
+
+                try {
+                    await fallbackOption.first().waitFor({ state: 'visible', timeout: 2000 });
+                    await fallbackOption.first().click({ timeout: 20000 });
+                } catch (fallbackError) {
+                    throw new Error(`Could not select option "${option}" from dropdown. Tried both role-based and fallback lookup.`);
+                }
             }
         }
-    }
 
-    async isElementVisible(locator: Locator, timeout: number = 20000): Promise<boolean> {
-        try {
-            await locator.waitFor({ state: 'visible', timeout });
-            return true;
-        } catch (error) {
-            return false;
+    async isElementVisible(locator: Locator, timeout: number = 20000): Promise < boolean > {
+            try {
+                await locator.waitFor({ state: 'visible', timeout });
+                return true;
+            } catch(error) {
+                return false;
+            }
+        } async getTextFromWebElements(locator: string): Promise < string[] > {
+            return this.page.$$eval(locator, elements => elements.map(item => item.textContent.trim()));
         }
-    } async getTextFromWebElements(locator: string): Promise<string[]> {
-        return this.page.$$eval(locator, elements => elements.map(item => item.textContent.trim()));
-    }
 
-    async downloadFile(locator: string): Promise<string> {
-        const [download] = await Promise.all([
-            this.page.waitForEvent('download'),
-            this.page.click(locator)
-        ]);
-        await download.saveAs(path.join(__dirname, '../Downloads', download.suggestedFilename()));
-        return download.suggestedFilename();
-    }
+    async downloadFile(locator: string): Promise < string > {
+            const [download] = await Promise.all([
+                this.page.waitForEvent('download'),
+                this.page.click(locator)
+            ]);
+            await download.saveAs(path.join(__dirname, '../Downloads', download.suggestedFilename()));
+            return download.suggestedFilename();
+        }
 
     static async keyPress(locator: Locator, key: string): Promise<void> {
         this.page.press(locator, key);
