@@ -41,12 +41,13 @@ test.describe("Test Cases Related to Login @Login", () => {
      test('C_02 Edit User', async ({ page }) => {
         await dashboardPage.openUsersPage();
         await usersPage.editUserPage();
+        await usersPage.searchUserPage();
     });
 
     test('C_03 Delete User', async ({ page }) => {
         await dashboardPage.openUsersPage();
-        await usersPage.openNewUserPage();
-        await dashboardPage.openUsersPage();
+        await usersPage.searchUserPage();
+        await usersPage.deleteNewUser();
     });
 
 });

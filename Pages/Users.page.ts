@@ -72,6 +72,25 @@ export class UsersPage {
     private get searchField(): Locator {
         return this.page.getByRole('searchbox', { name: 'Search', exact: true });
     }
+    private userEmailList(name: string): Locator {
+        return this.page.getByRole('link', { name });
+    }
+    private userEditEmailList(name: string): Locator {
+        return this.page.getByRole('textbox', { name: 'Email*' });
+    }
+    private get userEditMenuBTN(): Locator {
+        return this.page.locator('.whitespace-nowrap.px-3');
+    }
+    private get userEditBTN(): Locator {
+        return this.page.getByRole('link', { name: 'Edit' });
+    }
+    private get saveUserEditBTN(): Locator {
+        return this.page.getByRole('button', { name: 'Save changes' });
+    }
+    private get userDeleteBTN(): Locator {
+        return this.page.getByRole('button', { name: 'Delete' });
+    }
+
 
     //#endregion
 
@@ -87,7 +106,20 @@ export class UsersPage {
     }
 
     async editUserPage(): Promise<void> {
+        const savedUser = loadUser();
+        if (!savedUser) {
+            throw new Error('No saved user found. Run addNewUser() first to create and save a user.');
+        }
         await this.searchUserPage();
+        await this.webActions.clickElement(this.userEditMenuBTN);
+        await this.page.waitForLoadState('domcontentloaded');
+        await expect(this.userEditBTN).toBeVisible();
+        await this.webActions.clickElement(this.userEditBTN);
+        await this.page.waitForLoadState('networkidle');
+        await expect(this.userEditEmailList(savedUser.email)).toBeVisible();
+
+        await this.editNewUser();
+
 
 
     }
@@ -101,7 +133,8 @@ export class UsersPage {
         await this.webActions.setValue(this.searchField, savedUser.email);
         console.log('Searching for user with email:', savedUser.email);
         await this.page.waitForLoadState('domcontentloaded');
-        await expect(this.page.getByRole('link', { name: savedUser.email })).toBeVisible();
+        await expect(this.userEmailList(savedUser.email)).toBeVisible();
+        await expect(this.userEditMenuBTN).toBeVisible();
 
     }
 
@@ -140,6 +173,62 @@ export class UsersPage {
         console.log('Created user:', this.user.getEmail());
 
         // Save generated user data to test-data/saved-user.json for later reuse
+        this.saveUser();
+
+
+
+    }
+
+
+
+
+
+    async editNewUser(): Promise<void> {
+        console.log('editing user with email:', this.user);
+        await this.webActions.setValue(this.firstNameField, this.user.getFirstname());
+        await this.webActions.setValue(this.lastNameField, this.user.getLastname());
+        await this.webActions.setValue(this.emailField, this.user.getEmail());
+
+        await this.webActions.clickElement(this.userTypeField);
+        await this.webActions.clickElement(this.departmentField);
+        await this.webActions.clickElement(this.departmentSelect('QA'));
+        await this.webActions.clickElement(this.departmentField);
+        await this.webActions.clickElement(this.departmentSelect('quality'));
+        await this.webActions.setValue(this.positionField, this.user.getPosition());
+        await this.webActions.setValue(this.phoneNumberField, this.user.getPhoneNumber());
+
+        await this.authSelect();
+
+        await this.page.waitForTimeout(250);
+        await this.webActions.clickElement(this.authField);
+        await this.webActions.clickElement(this.saveUserEditBTN);
+        await this.page.waitForLoadState('domcontentloaded');
+        await this.webActions.isElementVisible(this.searchField);
+
+        this.saveUser();
+    }
+
+    async deleteNewUser(): Promise<void> {
+        console.log('deleting user with email:', this.user);
+        const savedUser = loadUser();
+        if (!savedUser) {
+            throw new Error('No saved user found. Run addNewUser() first to create and save a user.');
+        }
+        await this.searchUserPage();
+        await this.webActions.clickElement(this.userEditMenuBTN);
+        await this.page.waitForLoadState('domcontentloaded');
+        await expect(this.userEditBTN).toBeVisible();
+        await this.webActions.clickElement(this.userEditBTN);
+        await this.webActions.clickElement(this.userDeleteBTN);
+
+        await this.page.waitForLoadState('domcontentloaded');
+
+
+    }
+
+
+
+    async saveUser(): Promise<void> {
         try {
             saveUser({
                 firstName: this.user.getFirstname(),
@@ -152,10 +241,8 @@ export class UsersPage {
         } catch (err) {
             console.warn('Warning: could not save user data to file.', err);
         }
-
-
-
     }
+
 
     async authSelect(): Promise<void> {
         const authSelect = this.page.getByRole('combobox', { name: 'Authentication Type*' });
