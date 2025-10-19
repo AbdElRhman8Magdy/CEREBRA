@@ -6,14 +6,19 @@ import { LoginData } from '../test-data/LoginData';
 import { DashboardPage } from '../Pages/Dashboard.page';
 import { group } from 'console';
 import { GroupsPage } from '../Pages/groups.page';
+import { UsersPage } from '../Pages/Users.page';
+import { da } from '@faker-js/faker';
+import { DepartmentsPage } from '../Pages/Departments.page';
 
 
-test.describe("Test Cases Related to Group @Group", () => {
+test.describe("Test Cases Related to departments @departments", () => {
 
     let webActions: WebActionsObj;
     let loginPage: LoginPage;
     let dashboardPage: DashboardPage;
     let groupsPage: GroupsPage;
+    let usersPage: UsersPage;
+    let departmentsPage: DepartmentsPage;
 
     test.beforeEach(async ({ page }) => {
         await page.waitForLoadState('domcontentloaded');
@@ -26,22 +31,16 @@ test.describe("Test Cases Related to Group @Group", () => {
         webActions = new WebActionsObj(page);
         dashboardPage = new DashboardPage(page);
         groupsPage = new GroupsPage(page);
-
+        usersPage = new UsersPage(page);
+        departmentsPage = new DepartmentsPage(page);
 
     });
 
-    test('G_01 Add a New Group ', async ({ page }) => {
-        await dashboardPage.openGroupsPage();
-
-        await groupsPage.createNewGroup();
-        await groupsPage.editGroupName();
-    });
-
-     test('G_02 Delete Group', async ({ page }) => {
-        await dashboardPage.openGroupsPage();
-        await groupsPage.createNewGroup();
-        await dashboardPage.openGroupsPage();
-        await groupsPage.deleteGroupName();
+    test('D_01 Add a New Department ', async ({ page }) => {
+        await dashboardPage.openDepartmentsPage();
+        await departmentsPage.addNewDepartment();
+        
+        
     });
 
 });

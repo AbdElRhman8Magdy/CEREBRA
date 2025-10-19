@@ -87,6 +87,8 @@ export class DashboardPage {
         await expect(this.SideMenuGroups).toBeVisible();
         await this.ensureSideMenuOpen();
         await this.webActions.clickElement(this.SideMenuGroups);
+        await this.webActions.isElementVisible(this.UserProfile);
+
     }
 
     async openUsersPage() {
@@ -94,17 +96,23 @@ export class DashboardPage {
         await this.ensureSideMenuOpen();
         await this.webActions.clickElement(this.SideMenuUsers);
         await this.webActions.waitForPageNavigation('domcontentloaded');
+        await this.webActions.isElementVisible(this.UserProfile);
+
     }
 
     async openDepartmentsPage() {
         await expect(this.SideMenuDepartments).toBeVisible();
         await this.ensureSideMenuOpen();
         await this.webActions.clickElement(this.SideMenuDepartments);
+        await this.webActions.isElementVisible(this.UserProfile);
+
     }
     async openRolesPage() {
         await expect(this.SideMenuRoles).toBeVisible();
         await this.ensureSideMenuOpen();
         await this.webActions.clickElement(this.SideMenuRoles);
+        await this.webActions.isElementVisible(this.UserProfile);
+
     }
 
     async ValidateDashboardPageIsOpen() {

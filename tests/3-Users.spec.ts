@@ -10,7 +10,7 @@ import { UsersPage } from '../Pages/Users.page';
 import { da } from '@faker-js/faker';
 
 
-test.describe("Test Cases Related to Login @Login", () => {
+test.describe("Test Cases Related to user @user", () => {
 
     let webActions: WebActionsObj;
     let loginPage: LoginPage;
