@@ -1,6 +1,8 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { WebActionsObj } from '../Lib/WebActions';
 import User from '../test-data/User';
+import { saveUser } from '../test-data/userStore';
+import { loadUser } from '../test-data/userStore';
 import { time } from 'console';
 
 
@@ -9,14 +11,14 @@ export class UsersPage {
     private readonly page: Page;
     private readonly webActions: WebActionsObj;
     private readonly user: User;
-    private readonly dept: string ;
+    private readonly dept?: string;
 
     constructor(page: Page) {
         this.page = page;
         this.webActions = new WebActionsObj(page);
         this.user = new User();
     }
-    
+
     //#region User Page Locators
 
     private get newUserBTN(): Locator {
@@ -67,6 +69,9 @@ export class UsersPage {
     private get createBTN(): Locator {
         return this.page.locator('#key-bindings-1');
     }
+    private get searchField(): Locator {
+        return this.page.getByRole('searchbox', { name: 'Search', exact: true });
+    }
 
     //#endregion
 
@@ -81,9 +86,30 @@ export class UsersPage {
         await expect(this.firstNameField).toBeVisible();
     }
 
-    
+    async editUserPage(): Promise<void> {
+        await this.searchUserPage();
+
+
+    }
+    async searchUserPage(): Promise<void> {
+        const savedUser = loadUser();
+        if (!savedUser) {
+            throw new Error('No saved user found. Run addNewUser() first to create and save a user.');
+        }
+
+        await expect(this.searchField).toBeVisible();
+        await this.webActions.setValue(this.searchField, savedUser.email);
+        console.log('Searching for user with email:', savedUser.email);
+        await this.page.waitForLoadState('domcontentloaded');
+        await expect(this.page.getByRole('link', { name: savedUser.email })).toBeVisible();
+
+    }
+
+
+
 
     async addNewUser(): Promise<void> {
+        console.log('Creating user with email:', this.user);
         await this.webActions.setValue(this.firstNameField, this.user.getFirstname());
         await this.webActions.setValue(this.lastNameField, this.user.getLastname());
         await this.webActions.setValue(this.emailField, this.user.getEmail());
@@ -101,7 +127,7 @@ export class UsersPage {
 
         await this.authSelect();
 
-     
+
 
         // Give the application a moment to react to the change
         await this.page.waitForTimeout(250);
@@ -109,7 +135,23 @@ export class UsersPage {
         await this.webActions.clickElement(this.activeBTN);
         await this.webActions.clickElement(this.createBTN);
         await this.page.waitForLoadState('domcontentloaded');
+        await this.webActions.isElementVisible(this.newUserBTN);
         await expect(this.newUserBTN).toBeVisible();
+        console.log('Created user:', this.user.getEmail());
+
+        // Save generated user data to test-data/saved-user.json for later reuse
+        try {
+            saveUser({
+                firstName: this.user.getFirstname(),
+                lastName: this.user.getLastname(),
+                email: this.user.getEmail(),
+                password: this.user.getPassword(),
+                position: this.user.getPosition(),
+                phoneNumber: this.user.getPhoneNumber(),
+            });
+        } catch (err) {
+            console.warn('Warning: could not save user data to file.', err);
+        }
 
 
 
