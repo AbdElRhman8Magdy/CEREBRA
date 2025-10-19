@@ -3,6 +3,7 @@ import { WebActionsObj } from '../Lib/WebActions';
 import { LoginData } from '../test-data/LoginData';
 import * as fs from 'fs';
 import * as path from 'path';
+import { loadUser } from '../test-data/userStore';
 
 export class LoginPage {
 
@@ -102,6 +103,21 @@ export class LoginPage {
         }
         // reload so cookies are sent and localStorage is available in the app
         await this.page.reload({ waitUntil: 'domcontentloaded' , timeout: 10000 });
+    }
+
+    async loginNewUser() {
+      
+        const savedUser = loadUser();
+        if (!savedUser) {
+            throw new Error('No saved user found. Run addNewUser() first to create and save a user.');
+        }
+        await this.webActions.setValue(this.emailInput, savedUser.email);
+        await this.webActions.setValue(this.passwordInput, savedUser.password);
+        await this.webActions.clickElement(this.signInButton);
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+        await expect(this.pageHeader).toContainText('Dashboard');
+        await expect(this.UserProfile).toBeVisible();
+        await this.saveAuthState();
     }
 
     //#endregion

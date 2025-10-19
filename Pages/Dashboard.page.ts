@@ -1,6 +1,7 @@
 export * from './Dashboard.page';
 import { expect, Locator, Page } from '@playwright/test';
 import { WebActionsObj } from '../Lib/WebActions';
+import { time } from 'console';
 
 
 export class DashboardPage {
@@ -43,6 +44,9 @@ export class DashboardPage {
     private get UserProfile(): Locator {
         return this.page.getByRole('button', { name: 'User menu' });
     }
+    private get logOutBTN(): Locator {
+        return this.page.getByRole('button', { name: 'Sign out' });
+    }
 
     private get GeneralTab(): Locator {
         return this.page.getByRole('main').getByRole('link', { name: 'General' });
@@ -64,6 +68,13 @@ export class DashboardPage {
     async openUserProfile() {
         await expect(this.UserProfile).toBeVisible();
         await this.webActions.clickElement(this.UserProfile);
+    }
+    async logOut() {
+        await this.webActions.waitForPageNavigation('domcontentloaded');
+        await this.webActions.isElementVisible(this.UserProfile);
+        await expect(this.UserProfile).toBeVisible();
+        await this.webActions.clickElement(this.UserProfile, { timeout: 5000 });
+        await this.webActions.clickElement(this.logOutBTN);
     }
     async goBack() {
         await expect(this.GeneralTab).toBeVisible();

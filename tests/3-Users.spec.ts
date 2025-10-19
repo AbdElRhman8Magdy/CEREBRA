@@ -7,6 +7,7 @@ import { DashboardPage } from '../Pages/Dashboard.page';
 import { group } from 'console';
 import { GroupsPage } from '../Pages/groups.page';
 import { UsersPage } from '../Pages/Users.page';
+import { da } from '@faker-js/faker';
 
 
 test.describe("Test Cases Related to Login @Login", () => {
@@ -49,6 +50,17 @@ test.describe("Test Cases Related to Login @Login", () => {
         await dashboardPage.openUsersPage();
         await usersPage.searchUserPage();
         await usersPage.deleteNewUser();
+    });
+     test('C_03 Login New User', async ({ page }) => {
+        await dashboardPage.openUsersPage();
+        await usersPage.openNewUserPage();
+        await usersPage.addNewUser();
+        await usersPage.activateUserPage();
+        await dashboardPage.goBack();
+        await dashboardPage.logOut();
+        await loginPage.navigateToLoginPage();
+
+        await loginPage.loginNewUser();
     });
 
 });
