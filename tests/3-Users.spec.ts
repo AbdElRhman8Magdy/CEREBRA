@@ -42,6 +42,7 @@ test.describe("Test Cases Related to Login @Login", () => {
         await dashboardPage.openUsersPage();
         await usersPage.editUserPage();
         await usersPage.searchUserPage();
+        await usersPage.activateUserPage();
     });
 
     test('C_03 Delete User', async ({ page }) => {

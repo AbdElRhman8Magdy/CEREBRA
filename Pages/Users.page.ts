@@ -4,6 +4,7 @@ import User from '../test-data/User';
 import { saveUser } from '../test-data/userStore';
 import { loadUser } from '../test-data/userStore';
 import { time } from 'console';
+import { DashboardPage } from './Dashboard.page';   
 
 
 export class UsersPage {
@@ -12,11 +13,14 @@ export class UsersPage {
     private readonly webActions: WebActionsObj;
     private readonly user: User;
     private readonly dept?: string;
+    private readonly dashboardPage: DashboardPage;
+
 
     constructor(page: Page) {
         this.page = page;
         this.webActions = new WebActionsObj(page);
         this.user = new User();
+        this.dashboardPage = new DashboardPage(page);
     }
 
     //#region User Page Locators
@@ -84,11 +88,26 @@ export class UsersPage {
     private get userEditBTN(): Locator {
         return this.page.getByRole('link', { name: 'Edit' });
     }
+    private get userActivateBTNSelect(): Locator {
+        return this.page.getByRole('button', { name: 'Activate' });
+    }
+    private get userActivatePopUp(): Locator {
+        return this.page.getByRole('heading', { name: 'Activate' });
+    }
+    private get userActivateBTN(): Locator {
+        return this.page.getByRole('button', { name: 'Confirm' });
+    }
     private get saveUserEditBTN(): Locator {
         return this.page.getByRole('button', { name: 'Save changes' });
     }
     private get userDeleteBTN(): Locator {
         return this.page.getByRole('button', { name: 'Delete' });
+    }
+    private get userdeleteePopUp(): Locator {
+        return this.page.getByRole('heading', { name: 'Delete User' });
+    }
+    private get userdeleteeBTNSel(): Locator {
+        return this.page.getByRole('button', { name: 'Delete' }).nth(1);
     }
 
 
@@ -123,6 +142,28 @@ export class UsersPage {
 
 
     }
+
+    async activateUserPage(): Promise<void> {
+        const savedUser = loadUser();
+        if (!savedUser) {
+            throw new Error('No saved user found. Run addNewUser() first to create and save a user.');
+        }
+        await this.searchUserPage();
+        await this.webActions.clickElement(this.userEditMenuBTN);
+        await this.page.waitForLoadState('domcontentloaded');
+        await expect(this.userEditBTN).toBeVisible();
+        await this.webActions.clickElement(this.userActivateBTNSelect);
+        await this.page.waitForLoadState('load');
+        await expect(this.userActivatePopUp).toBeVisible();
+        await this.webActions.clickElement(this.userActivateBTN);
+        await this.page.waitForLoadState('domcontentloaded');
+        await expect(this.userEmailList(savedUser.email)).toBeVisible();
+
+
+
+
+    }
+
     async searchUserPage(): Promise<void> {
         const savedUser = loadUser();
         if (!savedUser) {
@@ -217,11 +258,17 @@ export class UsersPage {
         await this.searchUserPage();
         await this.webActions.clickElement(this.userEditMenuBTN);
         await this.page.waitForLoadState('domcontentloaded');
+        await this.webActions.isElementVisible(this.userEditBTN);
         await expect(this.userEditBTN).toBeVisible();
-        await this.webActions.clickElement(this.userEditBTN);
         await this.webActions.clickElement(this.userDeleteBTN);
-
         await this.page.waitForLoadState('domcontentloaded');
+        await expect(this.userdeleteePopUp).toBeVisible();
+        await this.webActions.clickElement(this.userdeleteeBTNSel);
+        await this.page.waitForLoadState('domcontentloaded');
+        await this.dashboardPage.openUsersPage();
+        await this.webActions.setValue(this.searchField, savedUser.email);
+        await expect(this.userEmailList(savedUser.email)).not.toBeVisible();
+
 
 
     }
