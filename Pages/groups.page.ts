@@ -45,6 +45,12 @@ export class GroupsPage {
     private get createdHeading(): Locator {
         return this.page.getByRole('heading', { name: 'Created' });
     }
+    private get deletemessage(): Locator {
+        return this.page.getByRole('heading', { name: 'Delete Group' });
+    }
+    private get deletedHeading(): Locator {
+        return this.page.getByRole('heading', { name: 'Deleted' });
+    }
 
     
 
@@ -52,13 +58,16 @@ export class GroupsPage {
         return this.page.getByRole('link', );
     }
     private searchfield(): Locator {
-        return this.page.getByRole('searchbox', { name: 'Search' })
+        return this.page.locator('id=input-2');
     }
     private saveChanges(): Locator {
         return this.page.getByRole('button', { name: 'Save Changes' })
     }
     private deleteChanges(): Locator {
         return this.page.getByRole('button', { name: 'Delete' })
+    }
+    private confirmDeleteChanges(): Locator {
+        return this.page.getByRole('button', { name: 'Delete' }).nth(1)
     }
 
 
@@ -149,6 +158,13 @@ export class GroupsPage {
         await expect(this.EditedTextbox).toBeVisible();
         await this.webActions.clickElement(this.deleteChanges());
         await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+        await expect(this.deletemessage).toBeVisible();
+        await this.webActions.clickElement(this.confirmDeleteChanges());
+        await this.page.waitForLoadState("domcontentloaded", { timeout: 10000 });
+        await expect(this.searchfield()).toBeVisible();
+        await this.webActions.setValue(this.searchfield(), this.DateString);
+        await this.page.waitForLoadState('networkidle');
+        await expect(this.EditedTextbox).not.toBeVisible();
     }
 
     //#endregion

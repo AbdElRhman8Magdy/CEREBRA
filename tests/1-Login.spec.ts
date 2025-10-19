@@ -4,6 +4,16 @@ import { LoginPage } from '../Pages/login.page';
 import { LoginData } from '../test-data/LoginData';
 import { DashboardPage } from '../Pages/Dashboard.page';
 
+// Global test setup - runs once before all tests
+test.beforeAll(async ({ browser }) => {
+    const page = await browser.newPage();
+    const loginPage = new LoginPage(page);
+    
+    await page.waitForLoadState('domcontentloaded');
+    await page.goto("/", { waitUntil: 'domcontentloaded' });
+    await loginPage.loginWithSavedState();
+    await page.close();
+});
 
 test.describe("Test Cases Related to Login @Login", () => {
 
