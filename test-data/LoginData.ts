@@ -1,8 +1,8 @@
 export const LoginData = {
  
   ValidLogin: {
-    email: 'dummyqatask@dummyqatask.test',
-    password: 'Dummyqatask@12345',
+    email: '11111111@1111.1111',
+    password: '111@1111',
     profile_id: '582'
   },
   InValidLogin: {
